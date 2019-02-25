@@ -41,7 +41,7 @@ for needle in sorted(needles):
         n = json.load(f)
 
     # Check if workaround tag exists if bugref is in name
-    if 'workaround' in n.get('properties', '') and not re.search(r'(poo|bsc|bnc|boo|jsc)#?[A-Z0-9]+', needle):
+    if 'workaround' in n.get('properties', '') and not re.search(r'(poo|bsc|bnc|boo|jsc|kde)#?[A-Z0-9]+', needle):
         error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
 
 sys.exit(returncode)
