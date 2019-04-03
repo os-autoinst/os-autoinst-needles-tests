@@ -44,4 +44,9 @@ for needle in sorted(needles):
     if 'workaround' in n.get('properties', '') and not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
         error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
 
+    # Check if multiple areas with type=click exist in the same needle
+    area_count = len([a for a in n['area'] if a['type'] == 'click'])
+    if area_count > 1:
+        error("Needle '{}' has {} areas with type=click while only one is allowed!".format(needle, area_count))
+
 sys.exit(returncode)
