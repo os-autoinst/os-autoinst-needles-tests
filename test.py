@@ -49,4 +49,9 @@ for needle in sorted(needles):
     if area_count > 1:
         error("Needle '{}' has {} areas with type=click while only one is allowed!".format(needle, area_count))
 
+    # Check if name contains timestamp
+    timestamp = re.sub(r"_.*$", '', re.sub(r"[_-][0-9]{1,2}$", '', needle).split("-")[-1])
+    if not timestamp.isnumeric() or len(timestamp) < 8 or int(timestamp) < 20130000:
+        error("Needle '{}' missing or invalid timestamp!".format(needle))
+
 sys.exit(returncode)
