@@ -40,9 +40,16 @@ for needle in sorted(needles):
     with open(jsonfile) as f:
         n = json.load(f)
 
-    # Check if workaround tag exists if bugref is in name
-    if 'workaround' in n.get('properties', '') and not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
-        error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
+    # Check if workaround tag exists if bugref is in name or if there is a reason in json file
+    for p in n.get('properties', []):
+        if isinstance(p, str) and p == 'workaround':
+            if not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
+                error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
+            break
+        elif isinstance(p, dict) and p['name'] == 'workaround':
+            if p['value'] == '':
+                error("Needle '{}' includes a workaround tag but has no reason in json file!".format(needle))
+            break
 
     # Check if multiple areas with type=click exist in the same needle
     area_count = len([a for a in n['area'] if a['type'] == 'click'])
