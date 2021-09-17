@@ -54,4 +54,9 @@ for needle in sorted(needles):
     if not timestamp.isnumeric() or len(timestamp) < 8 or int(timestamp) < 20130000:
         error("Needle '{}' missing or invalid timestamp!".format(needle))
 
+    # Check if needle contains duplicate tags
+    if len(n['tags']) != len(set(n['tags'])):
+        error("Needle '{}' has duplicate tags!".format(needle))
+
+
 sys.exit(returncode)
