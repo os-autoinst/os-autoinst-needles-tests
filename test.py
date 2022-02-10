@@ -40,8 +40,14 @@ for needle in sorted(needles):
     with open(jsonfile) as f:
         n = json.load(f)
 
-    # Check if workaround tag exists if bugref is in name
-    if 'workaround' in n.get('properties', '') and not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
+    # Extract properties, we support legacy type with plain tags
+    # properties: [tag1, tag2]
+    # or new format with name-value pairs
+    # properties: [{name: tag1, value: abc}]
+    prop_names = map(lambda p: p.get('name') if type(p) is dict else p, n.get('properties', []))
+
+    # Check if bugref is in name if workaround tag exists
+    if 'workaround' in prop_names and not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
         error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
 
     # Check if multiple areas with type=click exist in the same needle
