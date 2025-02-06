@@ -39,6 +39,11 @@ for needle in sorted(needles):
     n = {}
     with open(jsonfile) as f:
         n = json.load(f)
+        # Check if there is a least one area of type match
+        if not n.get('area') or not isinstance(n['area'], list):
+            error(f"Needle '{needle}' is missing area list in json (or area list is empty)!")
+        if not [a for a in n['area'] if a.get('type') == 'match']:
+            error(f"Needle '{needle}' is missing at least one area of type match!")
 
     # Check if workaround tag exists if bugref is in name or if there is a reason in json file
     for p in n.get('properties', []):
