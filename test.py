@@ -1,12 +1,10 @@
-#!/usr/bin/python3
-
 import os
 import sys
 import re
 import json
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
-needledir = os.path.join(scriptdir, "..")
+needledir = os.path.abspath(os.path.join(scriptdir, ".."))
 
 returncode = 0
 
@@ -29,11 +27,11 @@ for needle in sorted(needles):
 
     # Check for file existence
     if not os.path.isfile(jsonfile):
-        error("Needle '{}' is missing its JSON file!".format(needle))
+        error(f"Needle '{needle}' is missing its JSON file!")
         continue # parsing the json makes no sense
 
     if not os.path.isfile(pngfile):
-        error("Needle '{}' is missing its PNG file!".format(needle))
+        error(f"Needle '{needle}' is missing its PNG file!")
 
     # Check JSON content
     n = {}
@@ -46,29 +44,33 @@ for needle in sorted(needles):
             error(f"Needle '{needle}' is missing at least one area of type match!")
 
     # Check if workaround tag exists if bugref is in name or if there is a reason in json file
-    for p in n.get('properties', []):
-        if isinstance(p, str) and p == 'workaround':
-            if not re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
-                error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
-            break
-        elif isinstance(p, dict) and p['name'] == 'workaround':
-            if p['value'] == '':
-                error("Needle '{}' includes a workaround tag but has no reason in json file!".format(needle))
-            break
+    properties = n.get('properties', [])
+    if properties is not None:
+        workaround_found = False
+        for p in properties:
+            if isinstance(p, str) and p == 'workaround':
+                if re.search(r'((poo|bsc|bnc|boo|kde)#?[A-Z0-9]+|jsc#?[A-Z]+-[0-9]+)', needle):
+                    workaround_found = True
+                break
+            elif isinstance(p, dict) and p.get('name') == 'workaround':
+                if p.get('value'):
+                    workaround_found = True
+                break
+        if not workaround_found:
+            error(f"Needle '{needle}' includes a workaround tag but has no bug-ID in filename or reason in json file!")
 
     # Check if multiple areas with type=click exist in the same needle
-    area_count = len([a for a in n['area'] if a['type'] == 'click'])
+    area_count = len([a for a in n.get('area', []) if a.get('type') == 'click'])
     if area_count > 1:
-        error("Needle '{}' has {} areas with type=click while only one is allowed!".format(needle, area_count))
+        error(f"Needle '{needle}' has {area_count} areas with type=click while only one is allowed!")
 
     # Check if name contains timestamp
-    timestamp = re.sub(r"_.*$", '', re.sub(r"[_-][0-9]{1,2}$", '', needle).split("-")[-1])
+    timestamp = needle.split('-')[-1]
     if not timestamp.isnumeric() or len(timestamp) < 8 or int(timestamp) < 20130000:
-        error("Needle '{}' missing or invalid timestamp!".format(needle))
+        error(f"Needle '{needle}' is missing or has an invalid timestamp!")
 
     # Check if needle contains duplicate tags
-    if len(n['tags']) != len(set(n['tags'])):
-        error("Needle '{}' has duplicate tags!".format(needle))
-
+    if len(set(n.get('tags', []))) != len(n.get('tags', [])):
+        error(f"Needle '{needle}' has duplicate tags!")
 
 sys.exit(returncode)
