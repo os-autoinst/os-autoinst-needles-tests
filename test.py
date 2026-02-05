@@ -52,7 +52,7 @@ for needle in sorted(needles):
                 error("Needle '{}' includes a workaround tag but has no bug-ID in filename!".format(needle))
             break
         elif isinstance(p, dict) and p['name'] == 'workaround':
-            if p['value'] == '':
+            if p.get('value', '') == '':
                 error("Needle '{}' includes a workaround tag but has no reason in json file!".format(needle))
             break
 
