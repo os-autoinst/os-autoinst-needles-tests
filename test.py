@@ -4,9 +4,10 @@ import os
 import sys
 import re
 import json
+from pathlib import Path
 
-scriptdir = os.path.dirname(os.path.realpath(__file__))
-needledir = os.path.join(scriptdir, "..")
+scriptdir = Path(os.path.dirname(os.path.realpath(__file__)))
+needledir = scriptdir / Path("..")
 
 returncode = 0
 
@@ -24,8 +25,8 @@ for f in os.listdir(needledir):
 
 # Check for missing parts
 for needle in sorted(needles):
-    jsonfile = os.path.join(needledir, needle + '.json')
-    pngfile = os.path.join(needledir, needle + '.png')
+    jsonfile = needledir / Path(needle + '.json')
+    pngfile = needledir / Path(needle + '.png')
 
     # Check for file existence
     if not os.path.isfile(jsonfile):
