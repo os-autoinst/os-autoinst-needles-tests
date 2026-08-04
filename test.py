@@ -63,9 +63,10 @@ for needle in sorted(needles):
         error(f"Needle '{needle}' has {area_count} areas with type=click but only one is allowed!")
 
     # Check if name contains timestamp
-    timestamp = re.sub(r"_.*$", '', re.sub(r"[_-][0-9]{1,2}$", '', needle).split("-")[-1])
+    needle_regex = r"[_-][0-9]{1,2}$"
+    timestamp = re.sub(r"_.*$", '', re.sub(needle_regex, '', needle).split("-")[-1])
     if not timestamp.isnumeric() or len(timestamp) < 8 or int(timestamp) < 20130000:
-        error(f"Needle '{needle}' missing or invalid timestamp!")
+        error(f"Needle '{needle}' is not matching the expected format: `{needle_regex}`!")
 
     # Check if needle contains duplicate tags
     if len(n['tags']) != len(set(n['tags'])):
