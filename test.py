@@ -4,9 +4,10 @@ import os
 import sys
 import re
 import json
+from pathlib import Path
 
-scriptdir = os.path.dirname(os.path.realpath(__file__))
-needledir = os.path.join(scriptdir, "..")
+scriptdir = Path(os.path.dirname(os.path.realpath(__file__)))
+needledir = scriptdir / Path("..")
 
 returncode = 0
 
@@ -24,16 +25,16 @@ for f in os.listdir(needledir):
 
 # Check for missing parts
 for needle in sorted(needles):
-    jsonfile = os.path.join(needledir, needle + '.json')
-    pngfile = os.path.join(needledir, needle + '.png')
+    jsonfile = needledir / Path(f"{needle}.json")
+    pngfile = needledir / Path(f"{needle}.png")
 
     # Check for file existence
     if not os.path.isfile(jsonfile):
-        error("Needle '{}' is missing its JSON file!".format(needle))
+        error(f"Needle '{needle}' is missing its JSON file!")
         continue # parsing the json makes no sense
 
     if not os.path.isfile(pngfile):
-        error("Needle '{}' is missing its PNG file!".format(needle))
+        error(f"Needle '{needle}' is missing its PNG file!")
 
     # Check JSON content
     n = {}
@@ -59,12 +60,13 @@ for needle in sorted(needles):
     # Check if multiple areas with type=click exist in the same needle
     area_count = len([a for a in n['area'] if a['type'] == 'click'])
     if area_count > 1:
-        error("Needle '{}' has {} areas with type=click while only one is allowed!".format(needle, area_count))
+        error(f"Needle '{needle}' has {area_count} areas with type=click but only one is allowed!")
 
     # Check if name contains timestamp
-    timestamp = re.sub(r"_.*$", '', re.sub(r"[_-][0-9]{1,2}$", '', needle).split("-")[-1])
+    needle_regex = r"[_-][0-9]{1,2}$"
+    timestamp = re.sub(r"_.*$", '', re.sub(needle_regex, '', needle).split("-")[-1])
     if not timestamp.isnumeric() or len(timestamp) < 8 or int(timestamp) < 20130000:
-        error("Needle '{}' missing or invalid timestamp!".format(needle))
+        error(f"Needle '{needle}' is not matching the expected format: `{needle_regex}`!")
 
     # Check if needle contains duplicate tags
     if len(n['tags']) != len(set(n['tags'])):
